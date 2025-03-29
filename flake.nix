@@ -6,7 +6,10 @@
   inputs.home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
   outputs = { self, nixpkgs, home-manager, ... }: {
-    hmModules.retroarch = import ./modules/retroarch.nix;
+    #hmModules.retroarch = import ./modules/retroarch.nix;
+    hmModules.retroarch = { ... }: {
+      imports = [ ./modules/retroarch.nix ];
+    };
 
     # Optional example/test config
     homeConfigurations.example = home-manager.lib.homeManagerConfiguration {
