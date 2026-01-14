@@ -3,7 +3,6 @@
 let
   cfg = config.programs.retroarch;
 
-  defaultLibretroDirectory = "${config.home.profileDirectory}/lib/retroarch/cores";
   configFilePath = "${config.xdg.configHome}/retroarch/retroarch.cfg";
 
   # Secrets (read from agenix)
@@ -84,7 +83,7 @@ in {
       enabledCores = lib.filterAttrs (name: _: cfg.cores ? ${name} && cfg.cores.${name}.enable) availableCores;
       corePackages = lib.mapAttrsToList (_: v: v.package) enabledCores;
     in {
-      home.packages = [ pkgs.retroarch ] ++ corePackages;
+      home.packages = [ (pkgs.retroarch-bare.wrapper { cores = corePackages; }) ];
 
       home.activation.generateRetroarchCfg = lib.hm.dag.entryAfter ["writeBoundary"] ''
         set -euo pipefail
@@ -103,7 +102,6 @@ in {
         cat > "${configFilePath}" <<EOF
 ${lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "${k} = \"${v}\"") (
   cfg.settings // {
-    libretro_directory = lib.attrByPath ["libretro_directory"] defaultLibretroDirectory cfg.settings;
     cheevos_username = "$cheevos_username";
     cheevos_password = "$cheevos_password";
   }
